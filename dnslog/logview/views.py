@@ -170,7 +170,7 @@ def api(request, logtype, udomain, hashstr):
                 re_result.append(result)
 
     elif logtype == 'dns':      
-        res = DNSLog.objects.all().filter(host__contains=host)      
+        res = DNSLog.objects.all().filter(host__contains=hashstr)      
         if len(res) > 0:
             for rr in res:
                 result = dict(
