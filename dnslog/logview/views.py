@@ -137,7 +137,7 @@ def logview(request, userid):
     return render_to_response('views.html', vardict)
 
 
-def api(request, logtype, udomain, hashstr):
+def api0(request, logtype, udomain, hashstr):
     apistatus = False
     host = "%s.%s." % (hashstr, udomain)
     if logtype == 'dns':
@@ -151,3 +151,34 @@ def api(request, logtype, udomain, hashstr):
     else:
         return HttpResponseRedirect('/')
     return render(request, 'api.html', {'apistatus': apistatus})
+
+def api(request, logtype, udomain, hashstr):  
+    import json                                         
+    result = None
+    re_result = []                                                                             
+    host = "%s.%s." % (hashstr, udomain)                                                               
+    if logtype == 'web':                                                                               
+        res = WebLog.objects.all().filter(path__contains=hashstr)                                                                                                                   
+        if len(res) > 0:                                                                               
+            for rr in res:
+                result = dict(
+                    time= str(rr.log_time),
+                    ipaddr = rr.remote_addr,
+                    ua = rr.http_user_agent,
+                    path = rr.path
+                )                                                                     
+                re_result.append(result)
+
+    elif logtype == 'dns':      
+        res = DNSLog.objects.all().filter(host__contains=host)      
+        if len(res) > 0:
+            for rr in res:
+                result = dict(
+                    time = str(rr.log_time),
+                    host = rr.host
+                    )
+                re_result.append(result)
+
+    else:
+        return HttpResponseRedirect('/')
+    return render(request, 'api.html', {'apistatus': json.dumps(re_result)})
