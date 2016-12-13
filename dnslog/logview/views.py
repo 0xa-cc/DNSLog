@@ -178,7 +178,25 @@ def api(request, logtype, udomain, hashstr):
                     host = rr.host
                     )
                 re_result.append(result)
-
+    elif logtype == 'all':      
+        res = DNSLog.objects.all().filter(host__contains='')      
+        if len(res) > 0:
+            for rr in res:
+                result = dict(
+                    time = str(rr.log_time),
+                    host = rr.host
+                    )
+                re_result.append(result)
+        res1 = WebLog.objects.all().filter(path__contains='')                                                                                                                   
+        if len(res1) > 0:                                                                               
+            for rr1 in res1:
+                result = dict(
+                    time= str(rr1.log_time),
+                    ipaddr = rr1.remote_addr,
+                    ua = rr1.http_user_agent,
+                    path = rr1.path
+                )                                                                     
+                re_result.append(result)
     else:
         return HttpResponseRedirect('/')
     return render(request, 'api.html', {'apistatus': json.dumps(re_result)})
